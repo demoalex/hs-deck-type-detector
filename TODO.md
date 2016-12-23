@@ -8,5 +8,6 @@
 ### Initial restrictions
 - 1 class 
 - 1 date range (meta is not changed during it)
+- no wild, normal game modes for now
 - 
 
