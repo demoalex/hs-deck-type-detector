@@ -1,4 +1,4 @@
-## Todo list
+## In general
 
 - get some deck database (hsreplay, heathpwn, etc.)
 - distance between decks
@@ -11,3 +11,8 @@
 - no wild, normal game modes for now
 - 
 
+## Hearthpwn decks
+
+- map cards to numbers / hashes
+- map cards to HS JSON 
+- scrape_warrior_pro_players_gadgetzan()

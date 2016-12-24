@@ -1,4 +1,4 @@
-#!/Users/fireharp/Documents/Prog/HS_AI/venv/bin/python
+#!../venv/bin/python
 import xmltodict
 
 for i in xrange(1000):
