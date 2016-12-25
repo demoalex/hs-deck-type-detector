@@ -17,6 +17,7 @@ Initial restrictions
 Hearthpwn decks
 ===============
 
--  map cards to numbers / hashes
+-  search for unguided kernel detection for 2d array we get from tsne
+-  check how we guess decks after that
+
 -  map cards to HS JSON
--  scrape\_warrior\_pro\_players\_gadgetzan()
