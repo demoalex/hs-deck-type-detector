@@ -57,18 +57,23 @@ def parse_decks_listing(text):
     return result
 
 
-def get_decks_listings_by_query(session=None, player=None, patch=None, class_=None, format_=None, sort=None):
+def get_decks_listings_by_query(session=None, player=None, patch=None, class_=None, format_=None, sort=None, page=None):
     """
     TODO: we should map human readable params to hearthpwn values(should we?)
 
-    :param player: player id from scripts/hearthpwn/proplayers.csv
-    :param patch: Gadgetzan
-    :param class_: Warrior
-    :param format: Standard
+    :param player: int, player id from scripts/hearthpwn/proplayers.csv
+    :param patch: int, Gadgetzan
+    :param class_: int, Warrior
+    :param format: int, Standard
     :param sort: sorting
+    :param page: int, sorting
     :return:
     """
-    url = 'http://www.hearthpwn.com/decks?filter-build=%s&filter-class=%s&filter-deck-tag=1&filter-player=%s&filter-show-standard=%s&sort=%s' % (patch, class_, player, format_, sort)
+    url = 'http://www.hearthpwn.com/decks?filter-build=%s&filter-class=%s&filter-deck-tag=1&filter-show-standard=%s&sort=%s' % (patch, class_, format_, sort)
+    if page is not None:
+        url += '&page=%d' % page
+    if player is not None:
+        url += '&filter-player=%d' % player
     req = session.get(url) if session else requests.get(url)
     text = req.text
     result = parse_decks_listing(text)
@@ -91,7 +96,7 @@ def scrape_warrior_pro_players_gadgetzan():
     # we don't know why this happens to hearthpwn, but it does. so let's just use it this way
     s.get('http://www.hearthpwn.com/decks?filter-build=31&filter-class=1024')
     lst = list(range(427))
-    random.shuffle(lst)  # try to shuffle ids for getting better parsing results
+    random.shuffle(lst)  # try to shuffle ids to get better parsing results
     for i in lst:
         arr = get_decks_listings_by_query(s, i+1, 31, 1024, 1, '-viewcount')
         with open("scripts/hearthpwn/output.csv", "a") as f:
@@ -99,6 +104,32 @@ def scrape_warrior_pro_players_gadgetzan():
             writer.writerows(arr)
         time.sleep(1)  # try to sleep not to get same results from server
         print "User %s is processed" % (i+1)
+
+
+def scrape_warrior_all_players_gadgetzan():
+    """
+    scrape all decks based on: Gadgetzan, Warrior
+
+    request / querystring
+    http://www.hearthpwn.com/decks?filter-build=31&filter-class=1024&filter-deck-tag=1&filter-show-standard=1&sort=-viewcount&page=XXX
+
+    59 pages here
+
+    :return: nothing
+    """
+    s = requests.Session()
+    # this session pre-heating is required, otherwise all filters are dropped
+    # we don't know why this happens to hearthpwn, but it does. so let's just use it this way
+    s.get('http://www.hearthpwn.com/decks?filter-build=31&filter-class=1024')
+    lst = list(range(59))
+    random.shuffle(lst)  # try to shuffle pages to get better parsing results
+    for i in lst:
+        arr = get_decks_listings_by_query(s, None, 31, 1024, 1, '-viewcount', i+1)
+        with open("scripts/hearthpwn/output.csv", "a") as f:
+            writer = csv.writer(f)
+            writer.writerows(arr)
+        time.sleep(1)  # try to sleep not to get same results from server
+        print "Page %d is processed" % (i+1)
 
 
 def get_deck_by_url(url, session=None, verbose=None):
@@ -145,13 +176,13 @@ def get_deck_by_url(url, session=None, verbose=None):
     return processed_card_arr, total
 
 
-def scrape_decks_from_csv():
+def scrape_decks_from_csv(csv_file):
     """
 
     :return: nothing
     """
 
-    with open('data/hearthpwn/pro_players_warrior_gadgetzan.csv', 'rb') as decks_file:
+    with open(csv_file, 'rb') as decks_file:
         reader = csv.reader(decks_file)
         decks = list(reader)
 
@@ -184,4 +215,6 @@ def scrape_decks_from_csv():
 
 
 # scrape_warrior_pro_players_gadgetzan()
-scrape_decks_from_csv()
+# scrape_warrior_all_players_gadgetzan()
+# scrape_decks_from_csv('data/hearthpwn/pro_players_warrior_gadgetzan.csv')
+scrape_decks_from_csv('data/hearthpwn/all_players_warrior_gadgetzan.csv')
